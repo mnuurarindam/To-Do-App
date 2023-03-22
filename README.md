@@ -9,7 +9,7 @@ Aplikasi yang dapat membantu membantu dalam mencatat aktivitas-aktivitas yang pe
 Aplikasi dibuat dahulu di dalam Snack kemudian di build melalui Visual Studio Code.
 
 ## Cara Instalasi
-Jalankan perintah di bawah ini untuk melakukan instalasi dependensi!
+Jalankan perintah di bawah ini untuk melakukan instalasi npm.
 
 ```
 npm install
