@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "tab-navigation-|-react-navigation",
+    "slug": "snack-d66cacef-9be6-4ab9-bf3d-00af8acc125b",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FFFFFF"
+      },
+      "package": "com.ari_marrezka.snackd66cacef9be64ab9bf3d00af8acc125b"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "8f697cca-4433-4ddb-add6-e34fb2c07b9f"
+      }
+    }
+  }
+}
