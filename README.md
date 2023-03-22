@@ -18,5 +18,4 @@ npm install
 Kemudian, jalankan perintah ini untuk membuka aplikasi via expo:
 ```
 npm start
-
-
+```
