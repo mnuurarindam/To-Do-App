@@ -111,8 +111,9 @@ export default class todo extends React.Component {
   };
 
   deleteItem = (id) => {
-    store.dispatch({ type: "DELETE_ITEM_ASYNC", id });
+    store.dispatch(deleteItem(id));
   };
+
 
   updateInput(key, value) {
     store.dispatch(updateInput(key, value));
