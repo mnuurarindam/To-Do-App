@@ -7,45 +7,116 @@ import {
   TouchableOpacity,
   ScrollView,
 } from "react-native";
+import { createStore, applyMiddleware } from "redux";
+import createSagaMiddleware from "redux-saga";
+import thunk from "redux-thunk";
+import { put, takeLatest } from "redux-saga";
 
-export default class Todo extends React.Component {
-  constructor() {
-    super();
-    this.state = {
-      newItem: "",
-      listOfItems: [],
-    };
-  }
+const sagaMiddleware = createSagaMiddleware();
 
-  deleteItem(id) {
-    const list = this.state.listOfItems;
-    const updatedList = list.filter((item) => item.id !== id);
-    this.setState({
-      listOfItems: updatedList,
-    });
-  }
-  updateInput(key, value) {
-    this.setState({
-      [key]: value,
-    });
-  }
-  addItem = () => {
-    if (this.state.newItem != "") {
+// Action Types
+const ADD_ITEM = "ADD_ITEM";
+const DELETE_ITEM = "DELETE_ITEM";
+const SET_ITEMS = "SET_ITEMS";
+const UPDATE_INPUT = "UPDATE_INPUT"; // add this
+
+// Action Creators
+export const addItem = (value) => ({ type: ADD_ITEM, value });
+export const deleteItem = (id) => ({ type: DELETE_ITEM, id });
+export const setItems = (items) => ({ type: SET_ITEMS, items });
+export const updateInput = (key, value) => ({ type: UPDATE_INPUT, key, value }); // add this
+
+
+// Reducer
+const initialState = {
+  newItem: "",
+  listOfItems: [],
+};
+
+const reducer = (state = initialState, action) => {
+  switch (action.type) {
+    case ADD_ITEM:
       const newItemJSON = {
-        id: 1 + Math.random(),
-        value: this.state.newItem.slice(),
+        id: state.listOfItems.length + 1,
+        value: action.value.slice(),
       };
 
-      const list = this.state.listOfItems;
+      const list = state.listOfItems.slice();
 
       list.push(newItemJSON);
 
-      this.setState({
+      return {
+        ...state,
         listOfItems: list,
         newItem: "",
-      });
+      };
+    case DELETE_ITEM:
+      const updatedList = state.listOfItems.filter(
+        (item) => item.id !== action.id
+      );
+      return {
+        ...state,
+        listOfItems: updatedList,
+      };
+    case SET_ITEMS:
+      return {
+        ...state,
+        listOfItems: action.items,
+      };
+    case UPDATE_INPUT: // add this
+      return {
+        ...state,
+        [action.key]: action.value,
+      };
+    default:
+      return state;
+  }
+};
+
+// Sagas
+function* addItemSaga(action) {
+  yield put(addItem(action.value));
+}
+
+function* deleteItemSaga(action) {
+  yield put(deleteItem(action.id));
+}
+
+function* rootSaga() {
+  yield takeLatest("ADD_ITEM_ASYNC", addItemSaga);
+  yield takeLatest("DELETE_ITEM_ASYNC", deleteItemSaga);
+}
+
+// Store
+const store = createStore(reducer, applyMiddleware(thunk, sagaMiddleware));
+sagaMiddleware.run(rootSaga);
+
+export default class todo extends React.Component {
+  constructor() {
+    super();
+    this.state = store.getState();
+  }
+
+  componentDidMount() {
+    store.subscribe(() => {
+      this.setState(store.getState());
+    });
+  }
+
+  addItem = () => {
+    if (this.state.newItem !== "") {
+      store.dispatch({ type: "ADD_ITEM_ASYNC", value: this.state.newItem });
+      store.dispatch({ type: "ADD_ITEM", value: this.state.newItem });
     }
   };
+
+  deleteItem = (id) => {
+    store.dispatch({ type: "DELETE_ITEM_ASYNC", id });
+  };
+
+  updateInput(key, value) {
+    store.dispatch(updateInput(key, value));
+  }
 
   render() {
     return (
@@ -58,7 +129,7 @@ export default class Todo extends React.Component {
             placeholder="  List item baru..."
             style={styles.inputBox}
             onChangeText={(text) => {
-              this.setState({ newItem: text });
+              this.updateInput("newItem", text);
             }}
             value={this.state.newItem}
           ></TextInput>
@@ -73,17 +144,14 @@ export default class Todo extends React.Component {
               {this.state.listOfItems.map((item) => {
                 return (
                   <View style={styles.listview}>
-                    <Text style={styles.textstyle}> {item.value}</Text>
+                    <Text style={styles.textstyle}>
+                      {item.value}
+                    </Text>
                     <TouchableOpacity
-                      style={{
-                        backgroundColor: "#1466FF",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        padding: 10,
-                      }}
+                      style={styles.deletebutton}
                       onPress={() => this.deleteItem(item.id)}
-                    >
-                      <Text style={{ color: "white" }}>Delete</Text>
+                      >
+                      <Text style={styles.deletetext}>x</Text>
                     </TouchableOpacity>
                   </View>
                 );
@@ -97,57 +165,70 @@ export default class Todo extends React.Component {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#E5EEFF",
-  },
-  textView: {
-    backgroundColor: "#1466FF",
-    height: 80,
-  },
-  text: {
-    textAlign: "center",
-    marginTop: "10%",
-    fontSize: 25,
-    color: "white",
-    fontWeight: "bold",
-  },
-  inputBox: {
-    backgroundColor: "white",
-    textAlign: "center",
-    fontSize: 20,
-    height: 40,
-  },
-  button: {
-    position: "absolute",
-    right: 20,
-    top: 200,
-    backgroundColor: "#1466FF",
-    width: 50,
-    height: 50,
-    borderRadius: 50,
-    alignItems: "center",
-    justifyContent: "center",
-    elevation: 8,
-  },
-
-  buttontext: {
-    color: "#fff",
-    fontSize: 24,
-  },
-  textstyle: {
-    fontSize: 20,
-    color: "#1466FF",
-  },
-  listview: {
-    borderWidth: 2,
-    height: 40,
-    justifyContent: "space-between",
-    borderColor: "#1466FF",
-    marginLeft: 20,
-    marginRight: 20,
-    marginTop: 20,
-    flexDirection: "row",
-    alignItems: "center",
-  },
+container: {
+flex: 1,
+backgroundColor: "#F5FCFF",
+},
+textView: {
+backgroundColor: "#E91E63",
+height: 70,
+justifyContent: "center",
+alignItems: "center",
+},
+text: {
+color: "white",
+fontSize: 20,
+},
+inputBox: {
+marginTop: 20,
+marginLeft: 20,
+marginRight: 20,
+fontSize: 18,
+borderWidth: 1,
+borderColor: "#E91E63",
+borderRadius: 8,
+height: 50,
+paddingLeft: 10,
+},
+button: {
+backgroundColor: "#E91E63",
+marginLeft: 20,
+marginRight: 20,
+marginTop: 10,
+height: 50,
+borderRadius: 8,
+justifyContent: "center",
+alignItems: "center",
+},
+buttontext: {
+color: "white",
+fontSize: 25,
+},
+listview: {
+flexDirection: "row",
+marginLeft: 20,
+marginRight: 20,
+marginTop: 10,
+backgroundColor: "#F5FCFF",
+borderRadius: 8,
+height: 50,
+alignItems: "center",
+},
+textstyle: {
+fontSize: 18,
+marginLeft: 20,
+flex: 1,
+},
+deletebutton: {
+width: 50,
+height: 50,
+backgroundColor: "#E91E63",
+borderRadius: 8,
+justifyContent: "center",
+alignItems: "center",
+},
+deletetext: {
+color: "white",
+fontSize: 20,
+},
 });
