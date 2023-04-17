@@ -1,6 +1,6 @@
 # To-Do List Mobile App
 
-<img src="assets/Screenshot.jpeg" width="200">
+<img src="assets/Screenshot.jpg" width="200">
 
 ## Deskripsi Aplikasi
 Aplikasi yang dapat membantu membantu dalam mencatat aktivitas-aktivitas yang perlu dilakukan.
